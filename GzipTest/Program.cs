@@ -6,7 +6,7 @@ using System.IO.Compression;
 using System.Linq;//
 using System.Text;//
 using System.Threading;
-using System.Threading.Tasks;//
+
 
 namespace GzipTest
 {
@@ -17,8 +17,8 @@ namespace GzipTest
         static void Main(string[] args)
         {
             Gzip gzip = new Gzip();
-            //string[] s = { "decompress", "m00.iso.gz", "m00.iso" };
-            gzip.Start(args);
+            string[] s = { "compress", "new.txt", "m00" };
+            gzip.Start(s);
             Console.WriteLine("Complate");
             Console.ReadKey();
 

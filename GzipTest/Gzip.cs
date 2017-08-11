@@ -8,7 +8,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace GzipTest
 {
@@ -108,7 +108,7 @@ namespace GzipTest
                         }
                     }
 
-                    ProgressBar.drawTextProgressBar((double)(inFile.Position / 1000000), (double)(inFile.Length / 1000000));
+                    ProgressBar.drawTextProgressBar((double)inFile.Position , (double)inFile.Length);
                 }
 
                 outFile.Close();
@@ -221,10 +221,22 @@ namespace GzipTest
 
         public void Start(string[] args)
         {
-
+            int i = 1;
             if (args.Length != 0)
                 foreach (string s in args)
-                    Parameters += s + " ";
+                {
+                    if(i < args.Length)
+                    {
+                        Parameters += s + " ";
+                        i++;
+                    }
+                    else
+                    {
+                        Parameters += s;
+                    }
+                   
+                }
+                   
 
             pattern = @"^(\b((c|dec)ompress)\b\s[^\[\]]{1,50}\s[^\[\]]{1,50})$";
             try
