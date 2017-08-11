@@ -10,8 +10,7 @@ namespace GzipTest
         static void Main(string[] args)
         {
             Gzip gzip = new Gzip();
-            string[] s = { "compress", "new.txt", "m00" };
-            gzip.Start(s);
+            gzip.Start(args);
             Console.WriteLine("Complate");
             Console.ReadKey();
 
