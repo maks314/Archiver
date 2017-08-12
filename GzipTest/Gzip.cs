@@ -49,7 +49,7 @@ namespace GzipTest
                 int _dataPortionSize;
                 Thread[] tPool;
                 byte[][] block_size_before_compression = new byte[threadNumber][];
-                byte[][] block_size_after_compression = new byte[threadNumber][];
+                
 
                 byte[][] result = new byte[threadNumber][];
                 Console.Write("Compressing\n");
