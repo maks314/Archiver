@@ -69,7 +69,7 @@ namespace GzipTest
                         }
 
                         block_size_before_compression[portionCount] = BitConverter.GetBytes(_dataPortionSize);
-
+                       
                         dataArray[portionCount] = new byte[_dataPortionSize];
                         inFile.Read(dataArray[portionCount], 0, _dataPortionSize);
 
@@ -82,23 +82,13 @@ namespace GzipTest
                     {
                         if (tPool[portionCount].ThreadState == System.Threading.ThreadState.Stopped)
                         {
-                            BitConverter.GetBytes(compressedDataArray[portionCount].Length + 1)
+                            BitConverter.GetBytes(compressedDataArray[portionCount].Length)
                                         .CopyTo(compressedDataArray[portionCount], 4);
 
+                            block_size_before_compression[portionCount].CopyTo(compressedDataArray[portionCount], compressedDataArray[portionCount].Length-4);
 
-                            block_size_after_compression[portionCount] = BitConverter.GetBytes(compressedDataArray[portionCount].Length);
-                            int size = block_size_after_compression[portionCount].Length
-                                                    + block_size_before_compression[portionCount].Length
-                                                                 + compressedDataArray[portionCount].Length;
-                            result[portionCount] = new byte[size];
-
-                            Array.ConstrainedCopy(block_size_before_compression[portionCount], 0,
-                                                  result[portionCount], 0, 4);
-                            Array.ConstrainedCopy(block_size_after_compression[portionCount], 0,
-                                                  result[portionCount], 4, 4);
-                            Array.ConstrainedCopy(compressedDataArray[portionCount], 0,
-                                                  result[portionCount], 8, compressedDataArray[portionCount].Length);
-                            outFile.Write(result[portionCount], 0, result[portionCount].Length);
+                           
+                            outFile.Write(compressedDataArray[portionCount], 0, compressedDataArray[portionCount].Length);
                             portionCount++;
                         }
                     }
@@ -152,7 +142,7 @@ namespace GzipTest
                 Thread[] tPool;
                 Console.Write("Decompressing\n");
 
-                byte[] buffer = new byte[4];
+                byte[] buffer = new byte[8];
                 while (inFile.Position < inFile.Length)
                 {
                     tPool = new Thread[threadNumber];
@@ -160,12 +150,14 @@ namespace GzipTest
                          (portionCount < threadNumber) && (inFile.Position < inFile.Length);
                          portionCount++)
                     {
+                       
+
                         inFile.Read(buffer, 0, buffer.Length);
-                        _dataPortionSize = BitConverter.ToInt32(buffer, 0);
-                        inFile.Read(buffer, 0, buffer.Length);
-                        compressedBlockLength = BitConverter.ToInt32(buffer, 0);
-                        compressedDataArray[portionCount] = new byte[compressedBlockLength + 1];
-                        inFile.Read(compressedDataArray[portionCount], 0, compressedBlockLength);
+                        compressedBlockLength = BitConverter.ToInt32(buffer, 4);
+                        compressedDataArray[portionCount] = new byte[compressedBlockLength];
+                        buffer.CopyTo(compressedDataArray[portionCount], 0);
+                        inFile.Read(compressedDataArray[portionCount], buffer.Length, compressedBlockLength - buffer.Length);
+                        _dataPortionSize = BitConverter.ToInt32(compressedDataArray[portionCount], compressedBlockLength - 4);
                         dataArray[portionCount] = new byte[_dataPortionSize];
 
                         tPool[portionCount] = new Thread(DecompressBlock);
@@ -180,7 +172,7 @@ namespace GzipTest
                             portionCount++;
                         }
                     }
-                    ProgressBar.drawTextProgressBar((double)(inFile.Position / 1000000), (double)(inFile.Length / 1000000));
+                    ProgressBar.drawTextProgressBar((double)inFile.Position, (double)inFile.Length);
                 }
 
                 outFile.Close();
